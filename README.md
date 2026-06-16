@@ -1,64 +1,59 @@
-# 🚀 Gerenciamento de Instâncias Amazon EC2 na AWS
+# 🚀 Gerenciamento de Instâncias Amazon EC2 na AWS para Algorithmic Trading
 
-Este repositório foi desenvolvido como parte de um desafio prático na plataforma [DIO](https://dio.me), com o objetivo de consolidar conhecimentos essenciais sobre o provisionamento, configuração e gerenciamento de servidores virtuais na nuvem utilizando o **Amazon EC2 (Elastic Compute Cloud)**.
+Este repositório foi desenvolvido como parte de um desafio prático na plataforma [DIO](https://dio.me), com o objetivo de consolidar conhecimentos sobre o provisionamento, configuração e gerenciamento de servidores virtuais na nuvem utilizando o **Amazon EC2 (Elastic Compute Cloud)** aplicado a cenários reais de automação e trading.
 
 ---
 
 ## 🎯 Objetivos do Projeto
-*   **Provisionar** instâncias EC2 utilizando as boas práticas de segurança da AWS.
-*   **Configurar** redes básicas e regras de firewall através de Security Groups.
-*   **Documentar** de forma clara e estruturada todo o processo técnico.
-*   **Utilizar o GitHub** como portfólio e ferramenta de compartilhamento de documentação técnica.
+*   **Provisionar** instâncias EC2 rodando ambiente Windows utilizando as boas práticas da AWS.
+*   **Configurar** regras de firewall através de Security Groups para acesso via RDP (Remote Desktop Protocol).
+*   **Documentar** o processo de infraestrutura necessário para execução de scripts de automação.
+*   **Utilizar o GitHub** como portfólio técnico estruturado.
 
 ---
 
 ## 🛠️ Tecnologias e Conceitos Utilizados
 *   **AWS Management Console**: Interface gráfica para gerenciamento dos recursos em nuvem.
-*   **Amazon EC2**: Servidores virtuais na nuvem (Instâncias).
-*   **Amazon Machine Image (AMI)**: Modelos de sistemas operacionais (ex: Ubuntu Server, Amazon Linux).
-*   **Key Pairs (Pares de Chaves)**: Chaves criptográficas para acesso SSH seguro (arquivos `.pem` ou `.ppk`).
-*   **Security Groups**: Firewall virtual para controlar o tráfego de entrada e saída.
+*   **Amazon EC2**: Servidores virtuais (Instâncias) para execução contínua de aplicações.
+*   **Amazon Machine Image (AMI)**: Modelos de sistemas operacionais — utilizando **Windows Server (Elegível para Free Tier)** para suporte nativo à API do MetaTrader 5 em Python.
+*   **Key Pairs (Pares de Chaves)**: Chaves criptográficas para decodificação da senha de administrador.
+*   **Security Groups**: Firewall virtual focado na abertura da porta **3389 (RDP)** restrita para acesso remoto seguro.
 
 ---
 
 ## 📋 Passo a Passo da Implementação
 
-### 1. Criação e Configuração da Instância EC2
+### 1. Criação e Configuração da Instância EC2 Windows
 1.  Acesse o Console AWS e navegue até o serviço **EC2**.
 2.  Clique em **Launch Instance** (Executar Instância).
-3.  **Nome do Servidor**: Defina uma tag de nome clara para identificação.
-4.  **AMI (Sistema Operacional)**: Selecionado o `Ubuntu Server 24.04 LTS` (elegível para o nível gratuito).
-5.  **Tipo de Instância**: Escolhido `t2.micro` (ou `t3.micro` dependendo da região) para manter os custos no *Free Tier*.
+3.  **Nome do Servidor**: Tag de identificação definida para o ambiente de execução dos robôs.
+4.  **AMI (Sistema Operacional)**: Selecionado o `Windows Server 2025 Base` (ou versão equivalente elegível para o nível gratuito).
+5.  **Tipo de Instância**: Escolhido `t2.micro` (ou `t3.micro`) para manter a infraestrutura dentro do *Free Tier*.
 
 ### 2. Segurança e Acesso Remoto
-1.  **Key Pair**: Criação de uma nova chave RSA em formato `.pem` para acesso via terminal SSH.
+1.  **Key Pair**: Geração do arquivo `.pem` para realizar a descriptografia segura da senha inicial do Windows.
 2.  **Network Settings (Security Group)**:
-    *   Criado um novo grupo de segurança.
-    *   Liberada a porta **22 (SSH)** apenas para o IP atual, garantindo segurança administrativa.
-    *   *(Opcional)* Liberadas as portas **80 (HTTP)** e **443 (HTTPS)** para tráfego web geral.
+    *   Criado um grupo de segurança específico.
+    *   Liberada a porta **3389 (RDP)** estritamente para o IP local atual do administrador, impedindo tentativas de acessos externos maliciosos.
 
-### 3. Inicialização e Conexão
-1.  A instância foi executada com sucesso e monitorada até o status `Running` (Executando).
-2.  A conexão foi realizada via terminal SSH utilizando o comando:
-    ```bash
-    ssh -i "sua-chave.pem" ubuntu@seu-ip-publico-ec2
-    ```
+### 3. Inicialização e Conexão de Área de Trabalho Remota
+1.  A instância foi iniciada até atingir o status `Running` (Executando).
+2.  Utilizando a ferramenta **Conexão de Área de Trabalho Remota (RDP)** nativa do sistema operacional, foi realizada a conexão ao IP público da instância fornecido pela AWS usando as credenciais configuradas.
 
 ---
 
 ## 💡 Insights e Aprendizados Adquiridos
-*   **Segurança em Primeiro Lugar**: Nunca se deve abrir a porta SSH (22) para o mundo (`0.0.0.0/0`). O ideal é restringir ao seu IP público atual ou usar soluções como o *AWS Systems Manager Session Manager*.
-*   **Gestão de Custos**: É fundamental monitorar o uso do Free Tier e lembrar de **interromper (Stop)** ou **encerrar (Terminate)** as instâncias que não estão mais em uso para evitar cobranças indesejadas.
-*   **Criptografia**: O par de chaves gerado é a única forma de acessar o servidor inicialmente. Perder a chave privada significa perder o acesso administrativo direto ao SO da instância.
+*   **Compatibilidade de Bibliotecas**: Identificação de restrições de arquitetura. Bibliotecas específicas como `MetaTrader5` para Python possuem dependências exclusivas de ambiente Windows, tornando o Windows Server a escolha obrigatória em vez do Linux.
+*   **Segurança de Redes**: A porta de gerenciamento remoto do Windows (3389) jamais deve ficar exposta para toda a internet (`0.0.0.0/0`). A filtragem por IP de origem no Security Group mitiga ataques de força bruta.
+*   **Otimização de Recursos**: Como instâncias de nível gratuito possuem limitações de hardware (1 GB RAM), a desativação de elementos visuais e a limitação do histórico de gráficos no terminal de trading são essenciais para evitar sobrecarga.
 
 ---
 
 ## 🗂️ Evidências Práticas
-*(Dica: Se você tirou prints, salve na pasta /images do seu repositório e remova os comentários abaixo)*
 
-| Tela do Dashboard EC2 | Acesso via Terminal |
-| :---: | :---: |
-| ![Dashboard EC2](./images/ec2-dashboard.png) | ![Conexão SSH](./images/ec2-connected.png) |
+| Tela do Dashboard EC2 |
+| :---: |
+| ![Dashboard EC2](./images/ec2-dashboard.png) |
 
 ---
 
@@ -67,4 +62,4 @@ Este repositório foi desenvolvido como parte de um desafio prático na platafor
 *   [Guia Prático de Markdown do GitHub](https://github.com)
 
 ---
-Feito com 💻 por [Seu Nome](https://github.com)
+Feito com 💻 por [Felipe RicardoTorquato Moura](https://github.com/NakedSnake87)
